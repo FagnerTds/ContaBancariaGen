@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import Conta.controller.ContaController;
 import Conta.model.ContaCorrente;
 import Conta.model.ContaPopanca;
 import Conta.util.Cores;
@@ -11,25 +12,30 @@ import Conta.util.Cores;
 public class Menu {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		
+		ContaController conta = new ContaController();
 
 		Scanner sc = new Scanner(System.in);
-		int opcao;
 		
+		int opcao, numero, agencia, tipo, aniversario;
+		String titular;
+		float saldo,limite;
 		
+		System.out.println("\nCriar contas\n");
 		
-		ContaCorrente cc1 = new ContaCorrente(2,232,1,"Bramante", 1500.0f, 1000.0f);
-		cc1.visualizar();
-		cc1.sacar(12000.0f);
-		cc1.depositar(780.0f);
-		cc1.visualizar();
+		ContaCorrente cc1 = new ContaCorrente(conta.gerarNumero(), 123,1,"Felix Hernandes", 1000f, 100.0f);
+		conta.cadastrar(cc1);
 		
-		ContaPopanca cp1 = new ContaPopanca(3, 123, 2, "Maria dos Santos", 1000.0f, 15);
-		cp1.visualizar();
-		cp1.sacar(1000.0f);
-		cp1.depositar(780.0f);
-		cp1.visualizar();
-
+		ContaCorrente cc2 = new ContaCorrente(conta.gerarNumero(), 127,1,"Fernanda Guerreiro", 2500f, 100.0f);
+		conta.cadastrar(cc2);
+		
+		ContaPopanca cp1 = new ContaPopanca(conta.gerarNumero(), 177,2,"Harry Potter", 2580f, 12);
+		conta.cadastrar(cp1);
+		
+		ContaPopanca cp2 = new ContaPopanca(conta.gerarNumero(), 125,2,"Moana do Mar", 8000f, 15);
+		conta.cadastrar(cp2);
+		
+		conta.listarTodas();
 		
 		while(true) {
 			
@@ -53,8 +59,10 @@ public class Menu {
 			System.out.println("*********************************************************");
 			System.out.println("  Digite a opção deejada:                                ");
 			System.out.println("                                                         "+Cores.TEXT_RESET);
+			
 			try{
 				opcao=sc.nextInt();
+				
 			}catch (InputMismatchException e) {
 				System.out.println("Digite apenas valores inteiros");
 				sc.nextLine();
@@ -62,32 +70,111 @@ public class Menu {
 			}
 			
 			if ( opcao==9) {
+				
 				System.out.println(Cores.TEXT_WHITE_BOLD+"Banco do Brazil com Z - O seu futuro começa aqui");
 				sc.close();
 				System.exit(0);
 			}
+			
 			switch(opcao) {
 			case 1:
 				System.out.println(Cores.TEXT_WHITE_BOLD+"Criar Conta\n\n");
+				
+				System.out.println("Digite o Número da agencia");
+				agencia=sc.nextInt();
+				System.out.println("Digite o Nome do titular");
+				sc.skip("\\R?");
+				titular = sc.nextLine();
+				
+				do {
+					System.out.println("Digite o tipo de conta (1-Cc ou 2-Cp: ");
+					tipo=sc.nextInt();
+				}while(tipo<1 && tipo>2);
+				
+				System.out.println("Digite o saldo da conta (R$): ");
+				saldo=sc.nextFloat();
+				
+				switch(tipo) {
+				case 1 -> {
+					System.out.println("Digite o limite de crédito (R$): ");
+					limite = sc.nextFloat();
+					conta.cadastrar(new ContaCorrente(conta.gerarNumero(),agencia, tipo, titular, saldo, limite));	
+				}
+				case 2 ->{
+					System.out.println("Digite o dia do anversário da conta: ");
+					aniversario= sc.nextInt();
+					conta.cadastrar(new ContaPopanca(conta.gerarNumero(),agencia, tipo, titular, saldo, aniversario));	
+				
+					}
+				}
+
 				keyPress();
 				break;
 			case 2:
 				System.out.println(Cores.TEXT_WHITE_BOLD+"Listar todas as Contas\n\n");
+				conta.listarTodas();
 				keyPress();
 
 				break;
 			case 3:
 				System.out.println(Cores.TEXT_WHITE_BOLD+"Consultar dados da Conta - por número\n\n");
+				
+				System.out.println("Digite o número das conta: ");
+				numero=sc.nextInt();
+				conta.procurarPorNumero(numero);
+				
 				keyPress();
 
 				break;
 			case 4:
 				System.out.println(Cores.TEXT_WHITE_BOLD+"Atualizar dados da Conta\n\n");
+				
+				System.out.println("Digite o numero da conta: ");
+				numero=sc.nextInt();
+				
+				if(conta.buscarCollection(numero)!= null) {
+					
+					System.out.println("Digite o Número da agencia");
+					agencia=sc.nextInt();
+					System.out.println("Digite o Nome do titular");
+					sc.skip("\\R?");
+					titular = sc.nextLine();
+					
+					System.out.println("Digite o saldo da conta (R$): ");
+					saldo=sc.nextFloat();
+					
+					tipo = conta.retornaTipo(numero);
+					
+					switch(tipo) {
+					case 1 -> {
+						System.out.println("Digite o limite de crédito (R$): ");
+						limite = sc.nextFloat();
+						conta.atualizar(new ContaCorrente(numero,agencia, tipo, titular, saldo, limite));	
+					}
+					case 2 ->{
+						System.out.println("Digite o dia do anversário da conta: ");
+						aniversario= sc.nextInt();
+						conta.atualizar(new ContaPopanca(numero,agencia, tipo, titular, saldo, aniversario));	
+					
+						}
+					default -> {
+					System.out.println("Tipo de conta inválido!");
+					}
+					}
+					
+				}else System.out.println("Conta não encontrada!");
+				
 				keyPress();
 
 				break;
 			case 5:
 				System.out.println(Cores.TEXT_WHITE_BOLD+"Apagar a Conta\n\n");
+				
+				System.out.println("Digite o número da conta para deletar");
+				numero=sc.nextInt();
+				
+				conta.deletar(numero);
+				
 				keyPress();
 
 				break;
